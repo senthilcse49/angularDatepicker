@@ -1,0 +1,15 @@
+{
+  "name": "datepicker",
+  "version": "0.0.1",
+  "authors": [
+    "senthilcse49 <senthilcse49@gmail.com>"
+  ],
+  "description": "Datepicker using angular",
+  "keywords": [
+    "datepciker",
+    "angular"
+  ],
+  "license": "MIT",
+  "homepage": "www.itsmesm.com",
+  "private": true
+}
