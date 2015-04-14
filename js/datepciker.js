@@ -20,17 +20,30 @@ myApp.controller('con',['$scope','$http',function($scope,$http){
         $scope._editOption = true;
         $scope.selectedMonth = $scope._todaysDate.getMonth();
         $scope.selectedYear = $scope._todaysDate.getFullYear();
+        
+        
         $http({method:'get',url:("js/config.json")}).success(function(data,status){
            $scope._format = data[0].format || $scope._format;   
            $scope._startDate = data[0].startDate || $scope._startDate;
-            $scope.getPrevDays($scope._startDate,$scope._todaysDate);       
+            $scope.getPrevDays($scope._startDate,$scope._todaysDate);     
+            $scope._fixedWidth =  data[0].fixedWidth ||true ;
+            $scope._elemWidth = data[0].elemWidth ||  "200px";
         });
         
         
         $scope.show = function(){
+            if(!$scope._fixedWidth)
+               $scope.elemWidth = $(inputElem).width()+"px";
             
              $scope.$apply(function(){
                  $scope.hideCalendar = false;
+             });
+        }
+        
+        $scope.hide = function(){
+         
+            $scope.$apply(function(){
+                 $scope.hideCalendar = true;
              });
         }
         
@@ -44,6 +57,8 @@ myApp.controller('con',['$scope','$http',function($scope,$http){
             $scope.getPrevDays(0,tempDate);
             
         }
+        
+        
         
         $scope.getPrevDays = function(num,_date){
            var tempDate = _date;
@@ -78,14 +93,19 @@ myApp.controller('con',['$scope','$http',function($scope,$http){
        //  console.log($scope.currentMonthDays +"   "+noOfDays); 
            // $scope.currentMonthDays.apply();
         }
+        
+        
+        
          $scope.nextYear =function(){
              $scope.selectedYear += 1;
              $scope.changeDP();
          }
+         
           $scope.prevYear =function(){
              $scope.selectedYear -= 1;
              $scope.changeDP();
          }
+          
         $scope.nextMonth =function(){
             $scope.selectedMonth += 1;
             if($scope.selectedMonth > 11)
@@ -95,6 +115,7 @@ myApp.controller('con',['$scope','$http',function($scope,$http){
             }
             $scope.changeDP();
         }
+        
         $scope.prevMonth =function(){
             
             $scope.selectedMonth -= 1;
@@ -106,13 +127,26 @@ myApp.controller('con',['$scope','$http',function($scope,$http){
             $scope.changeDP();
         }
         
-        $scope.getNumber = function(num) {
-            console.log("hhelo "+num +"   "+new Array(num));  
-            return new Array(num);   
+        $scope.selectDate = function(day){
+            console.log(day +"   day");
+            var tempDate = new Date($scope.selectedYear,$scope.selectedMonth,day);
+            
+            $($scope.elem).val(tempDate.toLocaleDateString("en-US"))
+            $($scope.elem).triggerHandler('input');
+            $($scope.elem).triggerHandler('change');
+             
+                 $scope.hideCalendar = true;
+            
         }
-        
+     
     }
 }]);
+
+
+
+
+
+
 myApp.directive('datepicker',['$compile','$window',function($compile,$window){
     return{
         restrict:'E',
@@ -144,7 +178,7 @@ myApp.directive('datepicker',['$compile','$window',function($compile,$window){
             
             /*start of the datepicker part*/
             dpTemplate += "<div class='days'><a ng-repeat='preDay in preStartOfMonth ' disabled>&nbsp;</a>";
-            dpTemplate += "<a href='#' ng-repeat='day in currentMonthDays'>{{day}}</a>";
+            dpTemplate += "<a href='#' ng-repeat='day in currentMonthDays' ng-click='selectDate(day)'>{{day}}</a>";
             dpTemplate += "<a ng-repeat='preDay in postEndOfMonth ' disabled>&nbsp;</a>";
             dpTemplate += "</div>";
             
@@ -153,11 +187,23 @@ myApp.directive('datepicker',['$compile','$window',function($compile,$window){
             console.log(dpTemplate);
             $scope.getData();
             $(inputElem).after($compile(angular.element(dpTemplate))($scope)); 
-            $(inputElem).bind('click',function(){
-               $scope.elemWidth = $(inputElem).width()+"px";
-                console.log($scope.elemWidth);
+            $(inputElem).bind('click focus',function(){
+                
                 $scope.show();
                 
+            });
+            $(inputElem).bind('blur',function(){
+                
+                $scope.hide();
+                
+            });
+            
+            $($window).bind('click',function(event){
+                if(event.target != inputElem)
+                {
+                    var elems = $(event.target).parentsUntil($('datepicker'));
+                    $scope.hide();
+                }
             });
         } 
     }
