@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Date Picker</title>
+    <style>
+    .comDatePicker{
+        position: absolute;
+        top:30px;
+        left:0px;
+       
+        border:1px solid black;
+        padding:5px 2px;
+        
+    }
+    .comDatePicker.hide{
+        display:none;    
+    }    
+    .comDatePicker select
+    {
+        border:none;
+        outline:none;
+    }
+    .comDPHeader{
+        text-align: center;
+    }
+    .comDPHeader .comDPHMonth , .comDPHeader .comDPHYear{
+        display:inline-block;
+    }    
+    .daysHeader{
+        background-color:blue;
+        width:100%;
+    }
+    .daysHeader label.dayHeader{
+      width:12.2%;
+        padding:3px .8%;
+        font-size:70%;
+        font-family:sans-serif;
+        font-weight: bold;
+        display:inline-block;
+        text-align: center;
+        text-decoration: none;
+    }
+    .days{
+            width:100%;
+            background-color:#ccc;
+        }
+    .days a{
+        width:12.2%;
+        margin:3px .5%;
+        display:inline-block;
+        text-align: center;
+        text-decoration: none;
+    }
+     </style>
+</head>
+<body ng-app="datepicker">
+    <div ng-controller='con' style='display:inline;'>
+    <datepicker ng-model='data'><input type="text" value="hello"></datepicker>
+        </div>
+    
+      <datepicker  ng-model='data'><input type="text" value="hello"></datepicker>
+    <script src="bower_components/angular/angular.js" type="text/javascript"></script>
+    <script src="bower_components/jquery/dist/jquery.js" type="text/javascript"></script>
+    <script src="js/datepciker.js" type="text/javascript"></script>
+</body>
+</html>
