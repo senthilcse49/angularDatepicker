@@ -1,7 +1,16 @@
 var myApp = angular.module("datepicker",[]);
-myApp.controller('con',['$scope','$http',function($scope,$http){
+
+myApp.value("eventBinded",false);
+
+
+
+myApp.controller('con',['$scope','$http','$window','eventBinded',function($scope,$http,$window,eventBinded){
     $scope.elem;
-    $scope.elemWidth; 
+    $scope.dpOpened = false;
+    $scope.mouseIn = false;
+    $scope.elemWidth;
+    $scope.topX=0;
+    $scope.leftY = 0;
     $scope.getData = function(){
         $scope.hideCalendar = true;
         $scope._format = "mm/dd/yyyy";
@@ -11,6 +20,8 @@ myApp.controller('con',['$scope','$http',function($scope,$http){
         $scope.preStartOfMonth = [1,2,3,4,5];
         $scope.postEndOfMonth = [1,2,3,4,5];
         $scope.currentMonthDays = [1,2,3,4,5,6,7,8,9];
+        
+         
         $scope._months = [{text:"Jan",value:0},{text:"Feb",value:1},
             {text:"Mar",value:2},{text:"Apr",value:3},{text:"May",value:4}
             ,{text:"Jun",value:5},{text:"Jul",value:6},{text:"Aug",value:7}
@@ -32,16 +43,26 @@ myApp.controller('con',['$scope','$http',function($scope,$http){
         
         
         $scope.show = function(){
-            if(!$scope._fixedWidth)
-               $scope.elemWidth = $(inputElem).width()+"px";
-            
-             $scope.$apply(function(){
-                 $scope.hideCalendar = false;
-             });
-        }
+            if(!$scope.dpOpened){
+               // $('.comDatePicker').hide();
+                if(!$scope._fixedWidth)
+                   $scope.elemWidth =                                  $($scope.elem).width()+"px";
+
+                $scope.topX = $($scope.elem).position().top+$($scope.elem).outerHeight()+"px";
+                 $scope.leftY = $($scope.elem).position().left+"px";
+               //    $('body').bind('click',function(event){dp_windowClick($scope,event)});
+                 $scope.$apply(function(){
+
+                     $scope.hideCalendar = false;
+                 });
+                $scope.dpOpened = true;
+            }
+        };
         
         $scope.hide = function(){
-         
+            $scope.dpOpened = false;
+           console.log("hide"); 
+          //  $('body').unbind('click',function(event){dp_windowClick($scope,event)});
             $scope.$apply(function(){
                  $scope.hideCalendar = true;
              });
@@ -127,6 +148,9 @@ myApp.controller('con',['$scope','$http',function($scope,$http){
             $scope.changeDP();
         }
         
+        $scope.hideOthers = function(){
+            $('.comDatePicker').hide();
+        }
         $scope.selectDate = function(day){
             console.log(day +"   day");
             var tempDate = new Date($scope.selectedYear,$scope.selectedMonth,day);
@@ -138,7 +162,21 @@ myApp.controller('con',['$scope','$http',function($scope,$http){
                  $scope.hideCalendar = true;
             
         }
+       
      
+        $scope.bindEvent = function(){
+            if(!eventBinded){
+                 $($window).bind('click',function(event){
+                     console.log("  event "+event.target);
+                    if(!$(event.target).attr("class") )
+                        $scope.hide();
+                    if($(event.target).attr("class") && $(event.target).attr("class").indexOf('dp_cal_inp_ng_scope') == -1){
+                       
+                        $scope.hide();
+                    }
+                });
+            }   
+        }
     }
 }]);
 
@@ -158,33 +196,33 @@ myApp.directive('datepicker',['$compile','$window',function($compile,$window){
         controller:'con',
         link:function($scope,$elem,$attr){
             var inputElem =  $elem.find('input')[0], 
-            dpTemplate = "<div class='comDatePicker' ng-hide='hideCalendar' ng-style='{width:elemWidth}'>";
+            dpTemplate = "<div class='comDatePicker dp_cal_inp_ng_scope' ng-hide='hideCalendar'  ng-style='{\"top\":topX,left:leftY}'>";
         
             /*start of DatePciker Header*/
-            dpTemplate += "<div class='comDPHeader'>";
-            dpTemplate += "<div class='comDPHMonth' ><label ng-click='prevMonth()'><</label>&nbsp;<label ng-click='nextMonth()'>></label>&nbsp;";
-            dpTemplate +="<select ng-model='selectedMonth'";
+            dpTemplate += "<div class='comDPHeader dp_cal_inp_ng_scope'>";
+            dpTemplate += "<div class='comDPHMonth dp_cal_inp_ng_scope' ><label class='dp_cal_inp_ng_scope' ng-click='prevMonth()'><</label>&nbsp;<label class='dp_cal_inp_ng_scope' ng-click='nextMonth()'>></label>&nbsp;";
+            dpTemplate +="<select class='dp_cal_inp_ng_scope' ng-model='selectedMonth'";
             dpTemplate += "ng-options='month.value as month.text for month in _months' ng-change='changeDP()'></select> ";
-            dpTemplate += "<div class='comDPHYear'><label>{{selectedYear}}</label>";
+            dpTemplate += "<div class='comDPHYear dp_cal_inp_ng_scope'><label class='dp_cal_inp_ng_scope'>{{selectedYear}}</label>";
             dpTemplate += " <input  ng-hide='_editOption' ng-model='selectedYear'>";
-            dpTemplate += "<label ng-click='prevYear()'><</label>&nbsp;<label ng-click='nextYear()'>></label>&nbsp;";
+            dpTemplate += "<label class='dp_cal_inp_ng_scope' ng-click='prevYear()'><</label>&nbsp;<label ng-click='nextYear()' class='dp_cal_inp_ng_scope'>></label>&nbsp;";
             
             dpTemplate += "</div>";
             /*end of DatePciker Header*/
             
             //Days Header
-            dpTemplate += "<div class='daysHeader'><label class='dayHeader' ng-repeat='day in _days'>{{day}}</label></div>";
+            dpTemplate += "<div class='daysHeader dp_cal_inp_ng_scope'><label class='dp_cal_inp_ng_scope dayHeader' ng-repeat='day in _days'>{{day}}</label></div>";
             
             
             /*start of the datepicker part*/
-            dpTemplate += "<div class='days'><a ng-repeat='preDay in preStartOfMonth ' disabled>&nbsp;</a>";
-            dpTemplate += "<a href='#' ng-repeat='day in currentMonthDays' ng-click='selectDate(day)'>{{day}}</a>";
-            dpTemplate += "<a ng-repeat='preDay in postEndOfMonth ' disabled>&nbsp;</a>";
+            dpTemplate += "<div class='dp_cal_inp_ng_scope days'><a class='dp_cal_inp_ng_scope' ng-repeat='preDay in preStartOfMonth ' disabled>&nbsp;</a>";
+            dpTemplate += "<a href='#' class='dp_cal_inp_ng_scope' ng-repeat='day in currentMonthDays' ng-click='selectDate(day)'>{{day}}</a>";
+            dpTemplate += "<a class='dp_cal_inp_ng_scope' ng-repeat='preDay in postEndOfMonth ' disabled>&nbsp;</a>";
             dpTemplate += "</div>";
             
             dpTemplate += "</div>";
             $scope.elem = inputElem;
-            console.log(dpTemplate);
+            $(inputElem).addClass("dp_cal_inp_ng_scope");
             $scope.getData();
             $(inputElem).after($compile(angular.element(dpTemplate))($scope)); 
             $(inputElem).bind('click focus',function(){
@@ -194,18 +232,15 @@ myApp.directive('datepicker',['$compile','$window',function($compile,$window){
             });
             $(inputElem).bind('blur',function(){
                 
-                $scope.hide();
+               // $scope.hide();
                 
             });
-            
-            $($window).bind('click',function(event){
-                if(event.target != inputElem)
-                {
-                    var elems = $(event.target).parentsUntil($('datepicker'));
-                    $scope.hide();
-                }
-            });
+           $scope.bindEvent();
+          
         } 
     }
 }]);
+
+
+
 
